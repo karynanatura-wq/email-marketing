@@ -246,4 +246,39 @@
         flyer.className = 'fly';
         flyer.style.left = rect.left + (rect.width / 2 - 30) + 'px';
         flyer.style.top = rect.top + (rect.height / 2 - 30) + 'px';
-        document.body.
+        document.body.appendChild(flyer);
+
+        setTimeout(() => {
+            flyer.style.left = boxRect.left + (boxRect.width / 2 - 30) + 'px';
+            flyer.style.top = boxRect.top + 'px';
+            flyer.style.transform = 'scale(0.1) rotate(45deg)';
+            flyer.style.opacity = '0';
+        }, 50);
+
+        setTimeout(() => flyer.remove(), 750);
+    }
+
+    function finishAction() {
+        document.getElementById('blur-overlay').style.display = 'flex';
+        launchConfetti();
+    }
+
+    function launchConfetti() {
+        for (let i = 0; i < 100; i++) {
+            const c = document.createElement("div");
+            c.className = "confetti";
+            c.style.background = `hsl(${Math.random()*360},100%,60%)`;
+            c.style.left = '50%';
+            c.style.top = '50%';
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 50 + Math.random() * 300;
+            c.style.setProperty("--x", `${Math.cos(angle) * velocity}px`);
+            c.style.setProperty("--y", `${Math.sin(angle) * velocity}px`);
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 2500);
+        }
+    }
+</script>
+
+</body>
+</html>
