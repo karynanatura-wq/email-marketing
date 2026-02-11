@@ -1,1 +1,249 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Marketing Mobile</title>
+    <style>
+        :root {
+            --pastel-pink: #ffd1dc;
+            --medium-pink: #ffb1c1;
+            --deep-pink: #ff0055;
+            --white: #ffffff;
+        }
 
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--pastel-pink);
+            overflow: hidden;
+        }
+
+        header {
+            background-color: var(--deep-pink);
+            color: var(--white);
+            text-align: center;
+            padding: 20px 0;
+            font-weight: 900;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 100;
+        }
+
+        .viewport {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding-top: 60px;
+        }
+
+        /* --- Widok 1 --- */
+        #view1 {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s ease-in-out, opacity 0.6s;
+        }
+
+        .login-box {
+            background-color: var(--medium-pink);
+            padding: 40px 25px;
+            border-radius: 30px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 85%;
+            max-width: 320px;
+        }
+
+        .login-box input {
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            outline: none;
+            background: var(--white);
+            font-size: 16px;
+        }
+
+        .btn-continue {
+            background-color: var(--deep-pink);
+            color: var(--white);
+            border: none;
+            padding: 15px;
+            border-radius: 15px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* --- Widok 2 --- */
+        #view2 {
+            position: absolute;
+            top: 60px;
+            left: 100%;
+            width: 100%;
+            height: calc(100% - 60px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-auto-rows: min-content;
+            gap: 20px;
+            padding: 30px;
+            transition: transform 0.6s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .product-card {
+            background: var(--white);
+            border-radius: 20px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.08);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            aspect-ratio: 1 / 1;
+            cursor: pointer;
+            transition: background-color 0.3s, filter 0.3s;
+            padding: 15px;
+        }
+
+        /* Klasa dodawana po kliknięciu */
+        .product-card.selected {
+            background-color: #d1d1d1;
+            filter: brightness(0.9);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        #box-wrapper {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            display: none;
+            z-index: 50;
+        }
+
+        #box-wrapper img { width: 100%; }
+
+        .fly {
+            position: fixed;
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+            z-index: 1000;
+            pointer-events: none;
+            transition: all 0.7s cubic-bezier(0.5, -0.5, 0.7, 0.5);
+        }
+
+        #blur-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        #galka {
+            width: 180px;
+            animation: rotate3d 3s linear infinite;
+        }
+
+        @keyframes rotate3d {
+            from { transform: rotateY(0deg); }
+            to { transform: rotateY(360deg); }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            z-index: 2100;
+            animation: explode 2.5s ease-out forwards;
+        }
+
+        @keyframes explode {
+            to {
+                transform: translate(var(--x), var(--y)) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .move-left #view1 { transform: translateX(-100%); opacity: 0; }
+        .move-left #view2 { transform: translateX(-100%); }
+    </style>
+</head>
+<body>
+
+<header>EMAIL MARKETING</header>
+
+<div class="viewport">
+    <section id="view1">
+        <div class="login-box">
+            <input type="text">
+            <input type="text">
+            <button class="btn-continue" onclick="nextView()">CONTINUE</button>
+        </div>
+    </section>
+
+    <section id="view2"></section>
+</div>
+
+<div id="box-wrapper" onclick="finishAction()">
+    <img src="box.png" alt="Box">
+</div>
+
+<div id="blur-overlay">
+    <img src="galka.png" id="galka" alt="Galka">
+</div>
+
+<script>
+    const grid = document.getElementById('view2');
+    for (let i = 1; i <= 6; i++) {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `<img src="product${i}.png">`;
+        card.onclick = (e) => startFlying(e, `product${i}.png`, card);
+        grid.appendChild(card);
+    }
+
+    function nextView() {
+        document.body.classList.add('move-left');
+        setTimeout(() => {
+            document.getElementById('box-wrapper').style.display = 'block';
+        }, 300);
+    }
+
+    function startFlying(event, imgSrc, element) {
+        // Zostaje ciemniejszy na stałe
+        element.classList.add('selected');
+
+        const rect = element.getBoundingClientRect();
+        const boxRect = document.getElementById('box-wrapper').getBoundingClientRect();
+
+        const flyer = document.createElement('img');
+        flyer.src = imgSrc;
+        flyer.className = 'fly';
+        flyer.style.left = rect.left + (rect.width / 2 - 30) + 'px';
+        flyer.style.top = rect.top + (rect.height / 2 - 30) + 'px';
+        document.body.
